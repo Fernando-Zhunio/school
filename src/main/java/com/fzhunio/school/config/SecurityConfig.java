@@ -52,6 +52,7 @@ public class SecurityConfig  {
                 auth -> {
                     auth.requestMatchers("@/v1/").permitAll();
                     auth.requestMatchers("/authentication/**").permitAll();
+                    auth.requestMatchers("/teacher").permitAll();
                 });
         // .formLogin(form -> {
         // form.successHandler(successHandler());
