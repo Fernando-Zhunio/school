@@ -1,5 +1,6 @@
 package com.fzhunio.school.config;
 
+import com.fzhunio.school.application.usecases.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,6 +8,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -44,34 +46,28 @@ public class SecurityConfig  {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, AuthenticationManager authenticationManager)
             throws Exception {
-//        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtUtils);
-//        jwtAuthenticationFilter.setAuthenticationManager(authenticationManager);
-//        jwtAuthenticationFilter.setFilterProcessesUrl("authentication/login");
+        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtUtils);
+        jwtAuthenticationFilter.setAuthenticationManager(authenticationManager);
+        jwtAuthenticationFilter.setFilterProcessesUrl("authentication/login");
 
         http.authorizeHttpRequests(
                 auth -> {
                     auth.requestMatchers("@/v1/").permitAll();
                     auth.requestMatchers("/authentication/**").permitAll();
                     auth.requestMatchers("/teacher").permitAll();
-                });
-        // .formLogin(form -> {
-        // form.successHandler(successHandler());
-        // // form.loginPage("/authentication/login").permitAll();
-        // form.permitAll();
-        // });
-        // .logout(logout -> {
-        // logout.logoutSuccessUrl("/authentication/login");
-        // });
+                })
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable);
 
+        http.sessionManagement(session -> {
+                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
-//        http.sessionManagement(session -> {
-//                    session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-//
-//                    session.maximumSessions(2);
-//                    session.sessionFixation().migrateSession();
-//                    session.invalidSessionUrl("/authentication/login");
-//                }).addFilter(jwtAuthenticationFilter)
-//                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
+                    session.maximumSessions(2);
+                    session.sessionFixation().migrateSession();
+                    session.invalidSessionUrl("/authentication/login");
+                }).addFilter(jwtAuthenticationFilter)
+                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -95,16 +91,16 @@ public class SecurityConfig  {
         return config.build();
     }
 
-//    @Bean
-//    public CorsFilter corsFilter() {
-//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-//        CorsConfiguration config = new CorsConfiguration();
-//        config.setAllowCredentials(true);
-//        config.addAllowedOrigin("*");
-//        config.addAllowedHeader("*");
-//        config.addAllowedMethod("*");
-//        source.registerCorsConfiguration("/**", config);
-//        return new CorsFilter(source);
-//    }
+    @Bean
+    public CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true);
+        config.addAllowedOrigin("http://localhost:3000");
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        source.registerCorsConfiguration("/**", config);
+        return new CorsFilter(source);
+    }
 }
 

@@ -1,7 +1,7 @@
-package com.fzhunio.school.config;
+package com.fzhunio.school.application.usecases;
 
-import com.fzhunio.school.user.UserRepository;
-import com.fzhunio.school.user.entity.UserEntity;
+import com.fzhunio.school.frameworks.repositories.UserRepository;
+import com.fzhunio.school.domain.entities.UserEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

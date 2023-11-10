@@ -1,7 +1,7 @@
-package com.fzhunio.school.authentication.dto;
+package com.fzhunio.school.application.usecases;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fzhunio.school.user.entity.UserEntity;
+import com.fzhunio.school.domain.entities.UserEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

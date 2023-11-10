@@ -1,6 +1,5 @@
 package com.fzhunio.school.adapters;
 
-import com.fzhunio.school.domain.dtos.TeacherStoreDto;
 import com.fzhunio.school.domain.entities.Teacher;
 import com.fzhunio.school.domain.services.TeacherService;
 import jakarta.validation.Valid;

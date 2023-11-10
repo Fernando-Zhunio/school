@@ -5,14 +5,18 @@ import com.fzhunio.school.tools.TypeSex;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
 @Entity
 @Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "teachers")
 public class Teacher {
     @Id
@@ -32,6 +36,7 @@ public class Teacher {
     @NotBlank
     private TypeDoc typeDoc;
     @NotBlank
+    @Column(unique = true)
     private String numberDoc;
     @NotBlank
     private String address;
