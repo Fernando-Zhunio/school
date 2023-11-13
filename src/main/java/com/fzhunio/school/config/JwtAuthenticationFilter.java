@@ -64,6 +64,5 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         response.getWriter().flush();
         super.successfulAuthentication(request, response, chain, authentication);
     }
-
 }
 

@@ -27,13 +27,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 .stream().map(role -> new SimpleGrantedAuthority("ROLE_".concat(role.getName().name())))
                 .collect(Collectors.toSet());
 
-        return new User(
-                user.getUsername(),
-                user.getPassword(),
-                true,
-                true,
-                true,
-                true,
-                grantedAuthorities);
+//        return new User(
+//                user.getUsername(),
+//                user.getPassword(),
+//                true,
+//                true,
+//                true,
+//                true,
+//                grantedAuthorities);
+        return UserDetailsImpl.build(user);
     }
 }

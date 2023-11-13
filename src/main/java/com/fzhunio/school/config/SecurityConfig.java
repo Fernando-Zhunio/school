@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -14,6 +16,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -51,25 +56,27 @@ public class SecurityConfig  {
         jwtAuthenticationFilter.setFilterProcessesUrl("authentication/login");
 
         http.authorizeHttpRequests(
-                auth -> {
-                    auth.requestMatchers("@/v1/").permitAll();
-                    auth.requestMatchers("/authentication/**").permitAll();
-                    auth.requestMatchers("/teacher").permitAll();
-                })
+                auth ->
+                    auth.requestMatchers(publicEndpoints()).permitAll()
+                    .anyRequest().authenticated()
+                )
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-                .csrf(AbstractHttpConfigurer::disable);
-
-        http.sessionManagement(session -> {
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> {
                     session.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
                     session.maximumSessions(2);
                     session.sessionFixation().migrateSession();
-                    session.invalidSessionUrl("/authentication/login");
-                }).addFilter(jwtAuthenticationFilter)
+                })
+                .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
-
         return http.build();
+    }
+
+    private RequestMatcher publicEndpoints() {
+        return new OrRequestMatcher(
+                new AntPathRequestMatcher("/authentication/**")
+        );
     }
 
     // public AuthenticationSuccessHandler successHandler() {
@@ -89,6 +96,16 @@ public class SecurityConfig  {
         AuthenticationManagerBuilder config = httpSecurity.getSharedObject(AuthenticationManagerBuilder.class);
         config.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
         return config.build();
+    }
+
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+
+        return authProvider;
     }
 
     @Bean
